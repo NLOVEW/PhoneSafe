@@ -1,9 +1,15 @@
 package com.example.nhb.nhb_phonesafe.activity;
 
+import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -13,9 +19,14 @@ import android.widget.TextView;
 
 import com.example.nhb.nhb_phonesafe.R;
 import com.example.nhb.nhb_phonesafe.utils.StreamUtil;
+import com.lidroid.xutils.HttpUtils;
+import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.ResponseInfo;
+import com.lidroid.xutils.http.callback.RequestCallBack;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,6 +34,7 @@ import java.net.URL;
 public class SplashActivity extends AppCompatActivity {
 
     private static final int SUCCESS_NUMBER =100;
+    private static final int FAILCONN =104;
     private TextView tv_version;
     private PackageManager pm;
     private PackageInfo info;
@@ -41,17 +53,13 @@ public class SplashActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SUCCESS_NUMBER:{
-                    Bundle bundle=msg.getData();
-                    versionName=bundle.getString("versionName");
-                    versionCode=bundle.getString("versionCode");
-                    versionDes=bundle.getString("versionDes");
-                    updatePath=bundle.getString("updatePath");
                     checkVersion();
                 }break;
             }
         }
     };
     private long startTime;
+    private Message message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,44 +133,118 @@ public class SplashActivity extends AppCompatActivity {
                         InputStream is=connection.getInputStream();
                         String info= StreamUtil.getInfo(is);
                         if(info!=null){
-                            Message message= Message.obtain();
-                            Bundle bundle=new Bundle();
                             JSONObject jsonObject=new JSONObject(info);
                             versionName = jsonObject.getString("versionName");
                             versionCode = jsonObject.getString("versionCode");
                             versionDes = jsonObject.getString("versionDes");
                             updatePath = jsonObject.getString("updatePath");
-                            bundle.putString("versionName",versionName);
-                            bundle.putString("versionCode",versionCode);
-                            bundle.putString("versionDes",versionDes);
-                            bundle.putString("updatePath",updatePath);
-                            message.setData(bundle);
+                            message = Message.obtain();
                             message.what=SUCCESS_NUMBER;
+                            mHandler.sendMessage(message);
                             //延时跳转
                             long endTime=SystemClock.currentThreadTimeMillis();
-                            if((endTime-startTime)<5000){
-                                SystemClock.sleep(5000-(endTime-startTime));
+                            if((endTime-startTime)<4000){
+                                SystemClock.sleep(4000-(endTime-startTime));
                             }
-                            mHandler.sendMessage(message);
-                        }else{
-                            Log.i("联网失败","未获得信息");
                         }
-                    }else{
-                        Log.i("联网信息","未取得链接");
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }catch (Exception e) {
+                    Intent intent=new Intent(getApplicationContext(),IndexActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         }.start();
     }
     private void checkVersion(){
         if(mLocalVersionCode<Integer.parseInt(versionCode)){
-            Log.i("比较成功是否更新","是"+versionCode);
+            alert();
         }else {
             Intent intent=new Intent(this,IndexActivity.class);
             startActivity(intent);
             finish();
         }
+    }
+
+    /**
+     * 弹出对话框提示更新
+     */
+    private void alert() {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("版本更新");
+        builder.setIcon(R.mipmap.new_version_icon);
+        builder.setMessage(versionDes);
+        builder.setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //更新下载新的apk
+                download();
+            }
+        });
+        builder.setNegativeButton("下次提醒", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent=new Intent(getApplicationContext(),IndexActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.show();
+    }
+
+    private void download() {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            final NotificationManager notification= (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+            final Notification.Builder notiBuilder=new Notification.Builder(getApplicationContext());
+            notiBuilder.setSmallIcon(R.mipmap.launch);
+            notiBuilder.setTicker("正在更新版本");
+            notiBuilder.setContentTitle("更新中");
+            String path=updatePath;
+            System.out.println("下载地址"+path);
+            String savePath= Environment.getExternalStorageDirectory().getPath()+"/app-release.apk";
+            System.out.println(savePath);
+            HttpUtils http=new HttpUtils();
+            http.download(path, savePath, new RequestCallBack<File>() {
+                @Override
+                public void onSuccess(ResponseInfo<File> responseInfo) {
+                    installApk(responseInfo.result);
+                }
+
+                @Override
+                public void onFailure(HttpException e, String s) {
+                }
+
+                @Override
+                public void onStart() {
+                    notiBuilder.setProgress(100,0,false);
+                    notification.notify(1,notiBuilder.build());
+                }
+
+                @Override
+                public void onLoading(long total, long current, boolean isUploading) {
+                    notiBuilder.setProgress((int) total, (int) current,false);
+                    notification.notify(1,notiBuilder.build());
+                }
+            });
+        }
+    }
+
+    /**
+     * 根据系统意图安装apk
+     * @param file
+     */
+    private void installApk(File file) {
+        Intent intent=new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivityForResult(intent,3);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Intent intent=new Intent(getApplicationContext(),IndexActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
