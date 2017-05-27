@@ -68,7 +68,7 @@ public class IndexActivity extends Activity {
 
                     }break;
                     case 9:{
-                        Intent intent=new Intent(getApplicationContext(),ToolActivity.class);
+                        Intent intent=new Intent(getApplicationContext(),SettingActivity.class);
                         startActivity(intent);
                     }break;
                 }

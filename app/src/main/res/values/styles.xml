@@ -16,4 +16,7 @@
         <item name="android:gravity">center</item>
         <item name="android:textSize">30sp</item>
     </style>
+    <style name="mycheck">
+        <item name="android:button">@drawable/check_select</item>
+    </style>
 </resources>

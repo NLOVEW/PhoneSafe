@@ -18,7 +18,7 @@
         <activity android:name=".activity.IndexActivity">
 
         </activity>
-        <activity android:name=".activity.ToolActivity">
+        <activity android:name=".activity.SettingActivity">
 
         </activity>
     </application>
