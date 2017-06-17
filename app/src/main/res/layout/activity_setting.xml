@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:NHB_PhoneSafe="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@mipmap/main_screen_bg">
     <com.example.nhb.nhb_phonesafe.view.SettingView
         android:id="@+id/sv_1"
+        NHB_PhoneSafe:desText="是否自动更新版本"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+    </com.example.nhb.nhb_phonesafe.view.SettingView>
+    <com.example.nhb.nhb_phonesafe.view.SettingView
+        android:id="@+id/sv_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        NHB_PhoneSafe:desText="用户设置">
     </com.example.nhb.nhb_phonesafe.view.SettingView>
 </LinearLayout>

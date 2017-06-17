@@ -4,10 +4,9 @@
     android:layout_height="wrap_content"
     android:padding="10dp">
     <TextView
-        android:id="@+id/tv_1"
+        android:id="@+id/tv_setting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="是否自动检测新版本"
         android:textSize="30sp"
         android:textColor="#fff"/>
 
@@ -26,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:textColor="#191616"
-        android:layout_below="@id/tv_1"
+        android:layout_below="@id/tv_setting"
         android:background="#131212"
         android:id="@+id/view" />
 </RelativeLayout>

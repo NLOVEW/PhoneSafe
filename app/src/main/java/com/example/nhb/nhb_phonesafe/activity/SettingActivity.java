@@ -6,10 +6,11 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.example.nhb.nhb_phonesafe.R;
+import com.example.nhb.nhb_phonesafe.utils.ContantValue;
 import com.example.nhb.nhb_phonesafe.utils.SpUtil;
 import com.example.nhb.nhb_phonesafe.view.SettingView;
 
-public class SettingActivity extends Activity {
+public class SettingActivity extends Activity{
 
     private SettingView sv;
 
@@ -32,7 +33,7 @@ public class SettingActivity extends Activity {
             @Override
             public void onClick(View v) {
                 sv.setChecked(!sv.isChecked());
-                SpUtil.setConfigBoolean(getApplicationContext(),"updateVersion",!sv.isChecked());
+                SpUtil.setConfigBoolean(getApplicationContext(), ContantValue.UPDATE_VERSION,!sv.isChecked());
             }
         });
     }

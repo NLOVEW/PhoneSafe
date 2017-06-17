@@ -19,4 +19,16 @@ public class SpUtil {
         }
         return sp.getBoolean(key,true);
     }
+
+    public static void setConfigPassword(Context context, String key, String value){
+        sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(key,value).commit();
+    }
+    public static String getConfigPassword(Context context,String key){
+        if(sp==null){
+            sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        }
+        return sp.getString(key,"");
+    }
 }
