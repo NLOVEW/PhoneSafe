@@ -17,7 +17,7 @@ public class SpUtil {
         if(sp==null){
             sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
         }
-        return sp.getBoolean(key,true);
+        return sp.getBoolean(key,false);
     }
 
     public static void setConfigPassword(Context context, String key, String value){

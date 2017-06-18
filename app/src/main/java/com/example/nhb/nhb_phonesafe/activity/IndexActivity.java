@@ -27,6 +27,7 @@ public class IndexActivity extends Activity {
     private GridView gv_content;
     private int[] image_id;
     private String[] image_des;
+    private EditText et_psd_3;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -107,7 +108,7 @@ public class IndexActivity extends Activity {
         bt_getpassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText et_psd_3= (EditText) view.findViewById(R.id.et_psd_3);
+                et_psd_3 = (EditText) view.findViewById(R.id.et_psd_3);
                 String key=Md5Util.Md5Convert(et_psd_3.getText().toString());
                 if(key.equals(value)){
                     Intent intent=new Intent(getApplicationContext(),AntiActivity.class);
